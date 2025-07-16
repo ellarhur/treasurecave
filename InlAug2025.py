@@ -8,7 +8,6 @@ filnamn ='gameresults.csv'
 
 import random
 
-
 # Introduktion till spelet
 print("Välkommen till Templets Tio Dörrar!")
 print("Enligt sägnen finns här en enorm skatt gömd, men ingen vet exakt var. Templet består av ett hemligt kammarsystem med tio massiva dörrar – och bakom endast en av dem vilar skatten.")
@@ -16,8 +15,7 @@ print("Men här är haken: För varje fel dörr du öppnar, halveras skatten.")
 print("Skattens värde krymper alltså för varje gång du chansar fel.")
 print("Välj noga och lycka till!\n")
 
-# Startmeny
-
+# Startmenyn
 startmessage = "Välj ett alternativ (1-4):"
 
 def startmenu():
@@ -41,11 +39,11 @@ def startmenu():
             break
         else: print(startmessage)
 
-
+# Själva spelet
 def play():
     treasuredoor = random.randint(1,10)
     treasurevalue = 10000
-    timesplayed = 0
+    tries = 0
     print("Spelet är startat. Du står just nu i templet framför de tio dörrarna. Skatten är värd 10 000 kr. Den halveras varje gång du väljer fel dörr.")
     
     while True:
@@ -54,11 +52,25 @@ def play():
             print("Välj ett tal mellan 1-10.")
             continue
         if choice == treasuredoor:
-            print("Grattis, du har hittat skatten när den var värd", treasurevalue, "kr!")
-            namn = input("Ange ditt namn för topplistan: ")
-            spara_resultat(namn, forsok)
-            break 
+            print("Grattis, du har hittat skatten när den var värd", treasurevalue, "kr, efter", tries, "gånger!")
+            name = input("Ange ditt namn för topplistan: ")
+            filnamn(name, tries)
+            seechart = input("Vill du se topplistan? Skriv Ja eller Nej")
+            if seechart == "Ja":
+                chart()
+                else: break
         if choice != treasuredoor:
-            timesplayed += 1
+            tries += 1
             treasurevalue = treasurevalue /2
             print("Du valde tyvärr fel dörr. Skatten är nu värd", treasurevalue, "kr")
+
+
+def filnamn(name, tries):
+    createfile = not os.path.exists(CSV_FILE)
+    with open(CSV_FILE, mode='a', newline='') as fil:
+        printer = csv.writer(fil)
+        if createfile:
+            printer.writerow(["Namn", "Försök"])
+        printer.writerow([name, tries])
+        
+def diagram():
