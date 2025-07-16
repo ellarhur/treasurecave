@@ -2,18 +2,20 @@
 2025.
 
 # Denna rad används för att namnge CSV-filen i koden. Använd sedan variabeln "filnamn" när du skapar din kod.
-filnamn ='gameresults.csv'
+filnamn ='skattresultat.csv'
 
 # Skriv din kod här:
 
 import random
+import csv
+import os
 
 # Introduktion till spelet
 print("Välkommen till Templets Tio Dörrar!")
 print("Enligt sägnen finns här en enorm skatt gömd, men ingen vet exakt var. Templet består av ett hemligt kammarsystem med tio massiva dörrar – och bakom endast en av dem vilar skatten.")
 print("Men här är haken: För varje fel dörr du öppnar, halveras skatten.")
 print("Skattens värde krymper alltså för varje gång du chansar fel.")
-print("Välj noga och lycka till!\n")
+print("Lycka till!\n")
 
 # Startmenyn
 startmessage = "Välj ett alternativ (1-4):"
@@ -62,7 +64,7 @@ def play():
         if choice != treasuredoor:
             tries += 1
             treasurevalue = treasurevalue /2
-            print("Du valde tyvärr fel dörr. Skatten är nu värd", treasurevalue, "kr")
+            print("Du valde tyvärr fel dörr. Skatten är nu värd", treasurevalue, "kr. Välj en ny dörr!")
 
 
 def filnamn(name, tries):
@@ -72,5 +74,5 @@ def filnamn(name, tries):
         if createfile:
             printer.writerow(["Namn", "Försök"])
         printer.writerow([name, tries])
-        
+
 def diagram():
