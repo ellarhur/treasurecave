@@ -46,33 +46,55 @@ def play():
     treasuredoor = random.randint(1,10)
     treasurevalue = 10000
     tries = 0
+    openeddoors = []
     print("Spelet är startat. Du står just nu i templet framför de tio dörrarna. Skatten är värd 10 000 kr. Den halveras varje gång du väljer fel dörr.")
     
     while True:
-        choice = int(input( "Skriv ett tal mellan 1-10 för att välja att öppna dörren med det numret."))
-        if choice < 1 or choice > 10:
-            print("Välj ett tal mellan 1-10.")
+        try:
+         choice = int(input( "Skriv ett tal mellan 1-10 för att välja att öppna dörren med det numret."))
+        except ValueError:
+            print("Ogiltigt val, skriv ett heltal mellan 1 och 10.")
             continue
-        if choice == treasuredoor:
-            print("Grattis, du har hittat skatten när den var värd", treasurevalue, "kr, efter", tries, "gånger!")
-            name = input("Ange ditt namn för topplistan: ")
-            filnamn(name, tries)
-            seechart = input("Vill du se topplistan? Skriv Ja eller Nej")
-            if seechart == "Ja":
-                chart()
-                else: break
+        
+        if choice < 1 or choice > 10:
+            print("Ogiltigt val, skriv ett heltal mellan 1 och 10.")
+            continue
+            
+        if choice in openeddoors:
+            print("Du har redan öppnat den dörren! Välj en annan dörr.")
+            continue
+        else:
+            openeddoors.append(choice)
         if choice != treasuredoor:
             tries += 1
             treasurevalue = treasurevalue /2
             print("Du valde tyvärr fel dörr. Skatten är nu värd", treasurevalue, "kr. Välj en ny dörr!")
+        if choice == treasuredoor:
+            print("Grattis, du har hittat skatten när den var värd", treasurevalue, "kr, efter", tries, "gånger!")
+            name = input("Ange ditt namn för topplistan: ")
+            save_to_file(name, tries)
+            break
 
 
-def filnamn(name, tries):
-    createfile = not os.path.exists(CSV_FILE)
-    with open(CSV_FILE, mode='a', newline='') as fil:
+def save_to_file(name, tries):
+    createfile = not os.path.exists(filnamn)
+    with open(filnamn, mode='a', newline='') as fil:
         printer = csv.writer(fil)
         if createfile:
             printer.writerow(["Namn", "Försök"])
         printer.writerow([name, tries])
 
+def chart():
+    print("Topplistan kommer här...")
+
 def diagram():
+    try:
+        with open(filnamn, 'r') as fil:
+            reader = csv.reader(fil)
+            for row in reader:
+                print(row)
+    except FileNotFoundError:
+        print("Ingen data finns att visa ännu. Spela först för att skapa data!")
+
+
+startmenu()
