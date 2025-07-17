@@ -37,7 +37,7 @@ def startmenu():
         elif choice == '3':
             diagram()
         elif choice == '4':
-            print("Spelet avslutat")
+            print("Spelet är avslutat, tack för att du spelade - se resultatet i csv-filen!")
             break
         else: print(startmessage)
 
