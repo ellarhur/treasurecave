@@ -41,7 +41,7 @@ def startmenu():
             break
         else: print(startmessage)
 
-# Själva spelet
+# Själva spelet, hur det är uppbyggt
 def play():
     treasuredoor = random.randint(1,10)
     treasurevalue = 10000
