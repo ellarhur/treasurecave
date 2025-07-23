@@ -8,6 +8,7 @@ filnamn ='skattresultat.csv'
 
 import random
 import csv
+import matplotlib.pyplot as plt
 import os
 
 # Introduktion till spelet
@@ -85,9 +86,6 @@ def save_to_file(name, tries):
         printer.writerow([name, tries])
 
 def chart():
-    print("Topplistan kommer här...")
-
-def diagram():
     try:
         with open(filnamn, 'r') as fil:
             reader = csv.reader(fil)
@@ -95,6 +93,41 @@ def diagram():
                 print(row)
     except FileNotFoundError:
         print("Ingen data finns att visa ännu. Spela först för att skapa data!")
+
+
+def read_csv_data():
+    try:
+        with open(filnamn, 'r') as fil:
+            reader = csv.reader(fil)
+            data = list(reader)
+            return data
+    except FileNotFoundError:
+        return None
+
+def diagram():
+    data = read_csv_data()
+    if data is None:
+        print("Spela först för att skapa ett diagram!")
+        return
+    
+    # Skippa header och räkna
+    game_results = data[1:]  # Skippa första raden (header)
+    data_to_plot = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    
+    # Räkna förekomster
+    for row in game_results:
+        tries = int(row[1])  # Antal försök från CSV
+        data_to_plot[tries - 1] += 1  # tries-1 eftersom index börjar på 0
+    
+    # Skapa x-värden
+    x_values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    
+    # Rita diagrammet (bara EN plt.bar!)
+    plt.bar(x_values, data_to_plot)
+    plt.title("Statistik över hur vanligt varje antal försök är")
+    plt.xlabel("Antal försök innan skatten hittades")
+    plt.ylabel("Antal spelare som behövde det antalet försök")
+    plt.show()
 
 
 startmenu()
