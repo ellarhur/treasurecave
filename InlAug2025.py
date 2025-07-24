@@ -38,7 +38,7 @@ def startmenu():
         elif choice == '3':
             diagram()
         elif choice == '4':
-            print("Spelet är avslutat, tack för att du spelade - se resultatet i csv-filen!")
+            print("Spelet är avslutat, tack för att du spelade!")
             break
         else: print(startmessage)
 
@@ -76,7 +76,7 @@ def play():
             save_to_file(name, tries)
             break
 
-
+# Sparar spelresultat i CSV-filen
 def save_to_file(name, tries):
     createfile = not os.path.exists(filnamn)
     with open(filnamn, mode='a', newline='') as fil:
@@ -85,16 +85,33 @@ def save_to_file(name, tries):
             printer.writerow(["Namn", "Försök"])
         printer.writerow([name, tries])
 
+# Resultat sparas i CSV-filen
 def chart():
     try:
         with open(filnamn, 'r') as fil:
             reader = csv.reader(fil)
-            for row in reader:
-                print(row)
+            data = list(reader)
+            
+            if len(data) == 0:
+                print("Ingen data finns att visa ännu. Spela först för att skapa data!")
+                return
+            
+            # Visa rubrik med formatering
+            print(f"{'Namn':<20} {'Försök':>10}")
+            print("-" * 30)
+            
+            # Visa varje rad med formatering
+            for i, row in enumerate(data):
+                if i == 0:  # Hoppa över header-raden i CSV:n
+                    continue
+                namn = row[0]
+                försök = row[1]
+                print(f"{namn:<20} {försök:>10}")
+                
     except FileNotFoundError:
         print("Ingen data finns att visa ännu. Spela först för att skapa data!")
 
-
+# Läser CSV-filen, skapar en funktion för att läsa data i CSV-filen
 def read_csv_data():
     try:
         with open(filnamn, 'r') as fil:
@@ -102,27 +119,24 @@ def read_csv_data():
             data = list(reader)
             return data
     except FileNotFoundError:
-        return None
+        print("Något gick fel, försök igen.")
 
+# Rita upp diagrammet baserat på CSV-filens data
 def diagram():
     data = read_csv_data()
     if data is None:
         print("Spela först för att skapa ett diagram!")
         return
-    
-    # Skippa header och räkna
-    game_results = data[1:]  # Skippa första raden (header)
+
+    game_results = data[1:]
     data_to_plot = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     
-    # Räkna förekomster
     for row in game_results:
-        tries = int(row[1])  # Antal försök från CSV
-        data_to_plot[tries - 1] += 1  # tries-1 eftersom index börjar på 0
-    
-    # Skapa x-värden
+        tries = int(row[1])
+        data_to_plot[tries - 1] += 1 
+
     x_values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     
-    # Rita diagrammet (bara EN plt.bar!)
     plt.bar(x_values, data_to_plot)
     plt.title("Statistik över hur vanligt varje antal försök är")
     plt.xlabel("Antal försök innan skatten hittades")
