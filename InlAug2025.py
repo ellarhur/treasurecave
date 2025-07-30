@@ -4,21 +4,26 @@
 # Denna rad används för att namnge CSV-filen i koden. Använd sedan variabeln "filnamn" när du skapar din kod.
 filnamn ='skattresultat.csv'
 
-# Skriv din kod här:
+# Skriv din kod här: 
+
+filnamn = 'skattresultat.csv'
 
 import random
 import csv
 import matplotlib.pyplot as plt
-import os
 
-# Introduktion till spelet
+# Text som introducerar spelets koncept och regler
+print("*" * 30)
 print("Välkommen till Templets Tio Dörrar!")
-print("Enligt sägnen finns här en enorm skatt gömd, men ingen vet exakt var. Templet består av ett hemligt kammarsystem med tio massiva dörrar – och bakom endast en av dem vilar skatten.")
-print("Men här är haken: För varje fel dörr du öppnar, halveras skatten.")
-print("Skattens värde krymper alltså för varje gång du chansar fel.")
-print("Lycka till!\n")
+print("Du befinner dig i en grotta långt under jordens yta. Enligt sägnen finns här en enorm skatt gömd, men ingen vet var.")
+print("Du står framför tio dörrar, numrerade 1-10. Öppna en i taget för att hitta skatten.")
+print("Men här är haken: För varje dörr du öppnar som är fel, halveras skatten.")
+print("Skattens värde krymper alltså när du gissar fel. Just nu är skatten värd 10 000 SEK.")
+print("Lycka till!")
+print("*" * 30)
 
-# Startmenyn
+
+#Spelmeny
 startmessage = "Välj ett alternativ (1-4):"
 
 def startmenu():
@@ -28,6 +33,7 @@ def startmenu():
         print("2. Visa topplistan")
         print("3. Visa ett diagram över tidigare resultat")
         print("4. Avsluta spelet")
+        print("*" * 30)
 
         print(startmessage)
         choice = input()
@@ -38,110 +44,121 @@ def startmenu():
         elif choice == '3':
             diagram()
         elif choice == '4':
-            print("Spelet är avslutat, tack för att du spelade!")
+            print("Du har valt att avsluta spelet, men tack för att du spelade!")
             break
         else: print(startmessage)
 
-# Själva spelet, hur det är uppbyggt
+# Om användaren väljer att starta spelet
+
 def play():
     treasuredoor = random.randint(1,10)
     treasurevalue = 10000
-    tries = 0
+    försök = 0
     openeddoors = []
-    print("Spelet är startat. Du står just nu i templet framför de tio dörrarna. Skatten är värd 10 000 kr. Den halveras varje gång du väljer fel dörr.")
-    
+    print("Spelet är startat, du står just nu i templet framför de tio dörrarna. Skatten är värd 10 000 SEK. Välj din första dörr genom att skriva ett tal mellan 1-10.")
+
     while True:
         try:
-         choice = int(input( "Skriv ett tal mellan 1-10 för att välja att öppna dörren med det numret."))
+            choice = int(input())
+            if choice < 1 or choice > 10:                   
+                print("Välj ett heltal mellan 1-10, inte högre eller lägre. Välj en ny dörr!")
+                continue
+
+            if choice in openeddoors: 
+                print("Du har redan valt den dörren, välj en annan dörr!")
+                continue
+                
         except ValueError:
-            print("Ogiltigt val, skriv ett heltal mellan 1 och 10.")
+            print("Välj ett heltal mellan 1-10, inte något annat tecken. Välj en ny dörr!")
             continue
         
-        if choice < 1 or choice > 10:
-            print("Ogiltigt val, skriv ett heltal mellan 1 och 10.")
-            continue
-            
-        if choice in openeddoors:
-            print("Du har redan öppnat den dörren! Välj en annan dörr.")
-            continue
-        else:
-            openeddoors.append(choice)
+        openeddoors.append(choice)
         if choice != treasuredoor:
-            tries += 1
-            treasurevalue = treasurevalue /2
-            print("Du valde tyvärr fel dörr. Skatten är nu värd", treasurevalue, "kr. Välj en ny dörr!")
+            försök += 1
+            treasurevalue = treasurevalue / 2
+            print("Du valde tyvärr fel dörr. Skatten är nu värd", treasurevalue, "SEK. Välj en ny dörr!")
+
         if choice == treasuredoor:
-            print("Grattis, du har hittat skatten när den var värd", treasurevalue, "kr, efter", tries, "gånger!")
-            name = input("Ange ditt namn för topplistan: ")
-            save_to_file(name, tries)
+            print("Grattis, du har hittat skatten när den var värd", treasurevalue, "SEK, efter", försök, "försök!")
+            namn = input("Ange ditt namn för att skrivas in på topplistan: ")
+            spararesultat(namn, försök)
             break
 
-# Sparar spelresultat i CSV-filen
-def save_to_file(name, tries):
-    createfile = not os.path.exists(filnamn)
-    with open(filnamn, mode='a', newline='') as fil:
-        printer = csv.writer(fil)
-        if createfile:
-            printer.writerow(["Namn", "Försök"])
-        printer.writerow([name, tries])
-
-# Resultat sparas i CSV-filen
-def chart():
+# Spara namn och antal försök i CSV-filen
+def spararesultat(namn, försök):
     try:
-        with open(filnamn, 'r') as fil:
-            reader = csv.reader(fil)
+        with open(filnamn, 'r'):
+            filen_finns = True
+    except FileNotFoundError:
+        filen_finns = False
+
+
+    with open(filnamn, mode='a', newline='') as csv_fil:
+        writer = csv.writer(csv_fil)
+        if not filen_finns:
+            writer.writerow(["Namn", "Försök"])
+        writer.writerow([namn, försök])
+
+
+# Öppnar CSV-filen vid menyval 2
+def chart():
+    try: 
+        with open(filnamn, 'r') as csv_fil:
+            reader = csv.reader(csv_fil)
             data = list(reader)
-            
+
             if len(data) == 0:
-                print("Ingen data finns att visa ännu. Spela först för att skapa data!")
+                print("Det finns ännu ingen data att visa, spela först för att skapa data!")
                 return
-            
-            # Visa rubrik med formatering
-            print(f"{'Namn':<20} {'Försök':>10}")
-            print("-" * 30)
-            
-            # Visa varje rad med formatering
-            for i, row in enumerate(data):
-                if i == 0:  # Hoppa över header-raden i CSV:n
-                    continue
-                namn = row[0]
-                försök = row[1]
-                print(f"{namn:<20} {försök:>10}")
-                
+
+# F-sträng för att skriva ut rubriken snyggt åt höger
+            print(f"{'Spelares namn:':} {'Antal försök:'}")
+            print("*" * 30)
+
+            for namn, försök in data:
+                    print(f"{namn:} {försök}")
+            print()
+
     except FileNotFoundError:
         print("Ingen data finns att visa ännu. Spela först för att skapa data!")
 
-# Läser CSV-filen, skapar en funktion för att läsa data i CSV-filen
-def read_csv_data():
-    try:
-        with open(filnamn, 'r') as fil:
-            reader = csv.reader(fil)
-            data = list(reader)
-            return data
-    except FileNotFoundError:
-        print("Något gick fel, försök igen.")
+# Felmeddelande som gör min kod mindre upprepad
+diagram_message = "Det finns ingen data ännu - spela först för att se diagrammet sen!"
 
-# Rita upp diagrammet baserat på CSV-filens data
+# Hämtar informationen från CSV-filen så att diagrammet kan skapas
+def kolla_csv_data():
+    try:
+        with open(filnamn, 'r') as csv_fil:
+            reader = csv.reader(csv_fil)
+            return list(reader)
+    except FileNotFoundError:
+        return diagram_message
+
+# Öppnar diagrammet vid menyval 3
 def diagram():
-    data = read_csv_data()
-    if data is None:
-        print("Spela först för att skapa ett diagram!")
+    data = kolla_csv_data()
+    if data is None or len(data) <= 1:
+        print(diagram_message)
         return
 
-    game_results = data[1:]
-    data_to_plot = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    
-    for row in game_results:
-        tries = int(row[1])
-        data_to_plot[tries - 1] += 1 
+    resultat = data[1:]  # 1: hoppar över första raden, som är rubriken
+    y = [0] * 10  # för försök 1–10
 
-    x_values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    
-    plt.bar(x_values, data_to_plot)
-    plt.title("Statistik över hur vanligt varje antal försök är")
-    plt.xlabel("Antal försök innan skatten hittades")
-    plt.ylabel("Antal spelare som behövde det antalet försök")
+    for rad in resultat:
+        try:
+            försök = int(rad[1])
+            if 1 <= försök <= 10:
+                y[försök - 1] += 1
+        except (IndexError, ValueError):
+            continue
+
+    x = list(range(1, 11)) # Listan måste vara 1-11 för i programmering är första värdet 0
+    plt.bar(x, y)
+    plt.title("Stapeldiagram över resultat")
+    plt.xlabel("Antal försök (dörrar öppnade)")
+    plt.ylabel("Antal spelare")
+    plt.xticks(x)
     plt.show()
 
-
+# Menyn som ska synas alltid förutom vid spelets start och slut
 startmenu()
