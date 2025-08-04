@@ -2,7 +2,6 @@
 2025.
 
 # Denna rad används för att namnge CSV-filen i koden. Använd sedan variabeln "filnamn" när du skapar din kod.
-filnamn ='skattresultat.csv'
 
 # Skriv din kod här: 
 
@@ -67,22 +66,25 @@ def play():
             if choice in openeddoors: 
                 print("Du har redan valt den dörren, välj en annan dörr!")
                 continue
-                
+
+            # Nu ökar vi antalet försök
+            försök += 1
+            openeddoors.append(choice)
+
         except ValueError:
             print("Välj ett heltal mellan 1-10, inte något annat tecken. Välj en ny dörr!")
             continue
-        
-        openeddoors.append(choice)
+
         if choice != treasuredoor:
-            försök += 1
             treasurevalue = treasurevalue / 2
             print("Du valde tyvärr fel dörr. Skatten är nu värd", treasurevalue, "SEK. Välj en ny dörr!")
 
-        if choice == treasuredoor:
+        else:
             print("Grattis, du har hittat skatten när den var värd", treasurevalue, "SEK, efter", försök, "försök!")
-            namn = input("Ange ditt namn för att skrivas in på topplistan: ")
+            namn = input("Ange ditt namn för att skrivas in på topplistan: ").strip()
             spararesultat(namn, försök)
             break
+
 
 # Spara namn och antal försök i CSV-filen
 def spararesultat(namn, försök):
@@ -100,27 +102,32 @@ def spararesultat(namn, försök):
         writer.writerow([namn, försök])
 
 
-# Öppnar CSV-filen vid menyval 2
 def chart():
     try: 
         with open(filnamn, 'r') as csv_fil:
             reader = csv.reader(csv_fil)
             data = list(reader)
 
-            if len(data) == 0:
+            if len(data) <= 1:
                 print("Det finns ännu ingen data att visa, spela först för att skapa data!")
                 return
 
-# F-sträng för att skriva ut rubriken snyggt åt höger
-            print(f"{'Spelares namn:':} {'Antal försök:'}")
-            print("*" * 30)
+            # Hoppa över rubrikraden
+            resultat = data[1:]
 
-            for namn, försök in data:
-                    print(f"{namn:} {försök}")
+            # Sortera efter antal försök (lägst först)
+            sorterad = sorted(resultat, key=lambda rad: int(rad[1]))
+
+            print(f"{'Spelares namn:':<20} {'Antal försök:':>15}")
+            print("*" * 35)
+
+            for namn, försök in sorterad:
+                print(f"{namn:<20} {försök:>15}")
             print()
 
     except FileNotFoundError:
         print("Ingen data finns att visa ännu. Spela först för att skapa data!")
+
 
 # Felmeddelande som gör min kod mindre upprepad
 diagram_message = "Det finns ingen data ännu - spela först för att se diagrammet sen!"
@@ -154,10 +161,11 @@ def diagram():
 
     x = list(range(1, 11)) # Listan måste vara 1-11 för i programmering är första värdet 0
     plt.bar(x, y)
-    plt.title("Stapeldiagram över resultat")
-    plt.xlabel("Antal försök (dörrar öppnade)")
+    plt.title("Statistik: Hur många försök har spelarna behövt")
+    plt.xlabel("Försök")
     plt.ylabel("Antal spelare")
     plt.xticks(x)
+    plt.yticks(range(0, max(y)+1)) 
     plt.show()
 
 # Menyn som ska synas alltid förutom vid spelets start och slut
