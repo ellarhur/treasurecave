@@ -22,7 +22,7 @@ print("Lycka till!")
 print("*" * 30)
 
 
-#Spelmeny
+#Spelmenyn skrivs ut och deras olika alternativ bestäms med siffror
 startmessage = "Välj ett alternativ (1-4):"
 
 def startmenu():
@@ -48,12 +48,11 @@ def startmenu():
         else: print(startmessage)
 
 # Om användaren väljer att starta spelet
-
 def play():
-    treasuredoor = random.randint(1,10)
-    treasurevalue = 10000
-    försök = 0
-    openeddoors = []
+    treasuredoor = random.randint(1,10) # Slumptal blir rätt dörr
+    treasurevalue = 10000 # Skatten i mitt spel är värd 10 000 SEK från början
+    försök = 0 # Räknar antalet försök
+    openeddoors = [] # Sparar öppnade dörrar i en lista
     print("Spelet är startat, du står just nu i templet framför de tio dörrarna. Skatten är värd 10 000 SEK. Välj din första dörr genom att skriva ett tal mellan 1-10.")
 
     while True:
@@ -67,7 +66,7 @@ def play():
                 print("Du har redan valt den dörren, välj en annan dörr!")
                 continue
 
-            # Nu ökar vi antalet försök
+            # Nu ökar vi antalet försök pga i programmering är första värdet 0
             försök += 1
             openeddoors.append(choice)
 
@@ -75,13 +74,13 @@ def play():
             print("Välj ett heltal mellan 1-10, inte något annat tecken. Välj en ny dörr!")
             continue
 
-        if choice != treasuredoor:
-            treasurevalue = treasurevalue / 2
+        if choice != treasuredoor: 
+            treasurevalue = round(treasurevalue / 2) # Avrundar talet till närmsta heltal
             print("Du valde tyvärr fel dörr. Skatten är nu värd", treasurevalue, "SEK. Välj en ny dörr!")
 
         else:
-            print("Grattis, du har hittat skatten när den var värd", treasurevalue, "SEK, efter", försök, "försök!")
-            namn = input("Ange ditt namn för att skrivas in på topplistan: ").strip()
+            print("Grattis, du har hittat skatten när den var värd", treasurevalue, "SEK, efter", försök, "försök bakom dörr", choice, "!")
+            namn = input("Ange ditt namn för att skrivas in på topplistan: ").strip() # .strip Tar bort onödiga mellanrum
             spararesultat(namn, försök)
             break
 
@@ -94,14 +93,14 @@ def spararesultat(namn, försök):
     except FileNotFoundError:
         filen_finns = False
 
-
+    # Om filen inte finns skapas den
     with open(filnamn, mode='a', newline='') as csv_fil:
         writer = csv.writer(csv_fil)
         if not filen_finns:
             writer.writerow(["Namn", "Försök"])
         writer.writerow([namn, försök])
 
-
+# Om användaren väljer att visa topplistan
 def chart():
     try: 
         with open(filnamn, 'r') as csv_fil:
@@ -112,10 +111,8 @@ def chart():
                 print("Det finns ännu ingen data att visa, spela först för att skapa data!")
                 return
 
-            # Hoppa över rubrikraden
-            resultat = data[1:]
+            resultat = data[1:] # Hoppa över rubrikraden
 
-            # Sortera efter antal försök (lägst först)
             sorterad = sorted(resultat, key=lambda rad: int(rad[1]))
 
             print(f"{'Spelares namn:':<20} {'Antal försök:':>15}")
@@ -165,7 +162,8 @@ def diagram():
     plt.xlabel("Försök")
     plt.ylabel("Antal spelare")
     plt.xticks(x)
-    plt.yticks(range(0, max(y)+1)) 
+    plt.yticks(range(0, max(y)+1, 2)) # Härmar designen av diagrammet i uppgiftsbeskrivningen, varannat tal 2, 4, 6 osv visas i y-axel
+    plt.bar(x, y, color='orange') # Även detta för att likna designen med orangea staplar
     plt.show()
 
 # Menyn som ska synas alltid förutom vid spelets start och slut
